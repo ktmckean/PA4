@@ -145,16 +145,18 @@ public class Graph {
 	}
 	
 	public void writeDotFile(String outputFile) throws IOException{
+		outputFile += ".dot";
 		File file = new File(outputFile);
+		
+		file.createNewFile();
 		FileWriter f = new FileWriter(file);
 		
-		f.write("digraph program 5\n");
+		f.write("digraph program5 {\n");
 		for(int i = 0; i < edges.size(); i++){
 			f.write(edges.get(i).toString());
-			if(i!=edges.size()-1){
-				f.write("\n");
-			}
+			f.write(";\n");
 		}
+		f.write("}\n");
 		f.close();
 		
 	}
