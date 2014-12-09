@@ -1,5 +1,6 @@
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.Scanner;
@@ -17,6 +18,7 @@ public class WebPages {
 	String[] docNames = new String[10];
 	double queryWeights;
 	Graph g = new Graph();
+	String dotFileName;									//The name of the output graph file
 
 
 	public void addPage(String fileName) {
@@ -202,6 +204,9 @@ public class WebPages {
 		try {
 			Scanner read = new Scanner(new File(fileName));
 
+			if(read.hasNext()){					//First line is the name of the dot-file output.
+				this.dotFileName = read.nextLine();
+			}
 			if(read.hasNextInt()){
 				word = read.next();
 				int size = Integer.parseInt(word);
@@ -217,7 +222,7 @@ public class WebPages {
 					eofsFlag = true;
 				else if(word.compareTo("*STOPs*") == 0){
 					stopsFlag = true;
-					printTerms();
+//					printTerms();
 					printedFlag = true;
 				}
 				else {	
@@ -264,8 +269,14 @@ public class WebPages {
 
 			}
 
-			read.close();	
+			read.close();
 
+			try {
+				g.writeDotFile(dotFileName);
+			} catch (IOException e) {
+				System.err.println("Error:  Graph file could not be printed.");
+				e.printStackTrace();
+			}
 
 			//			for(int i=0;i<searchWords.size();i++){
 			//				
@@ -483,11 +494,11 @@ public class WebPages {
 
 		while(fReader.hasNext()){
 			word = fReader.next();
-			if(word.contains("<a") && fReader.hasNext()){
-				word = fReader.next();
+			if(word.contains("<a") && fReader.hasNext()){		//"<a" signifies the start of a possible hyperlink
+				word = fReader.next();							//It can be followed by any amount of whitespace
 				if(word.startsWith("href=\"http://")){
 					word = word.substring(13);						//The first character of FILENAME has index 13.
-					if(word.contains("\"")){
+					if(word.contains("\">") && !word.startsWith("\">")){		//makes sure FILENAME is a name, not empty or unbounded
 						word = word.substring(0, word.indexOf("\">"));
 						g.add(fileName, word);
 					}
